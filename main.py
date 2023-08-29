@@ -10,16 +10,19 @@ class Post(BaseModel):  #---> Modelo imortado de pydantic que valida el formato 
     published: bool = True  #----> Valor por defecto.
     reting_optional: Optional[int] = None  #---> Valor opcional
 
+my_posts = [{'title':'my first post', 'content': 'content of my first post', 'id': 1}, {'title':'my second post', 'content': 'content of my second post', 'id': 2}]
+
 @app.get("/")
 def read_root():
     return {"Hello": "Worlddddd"}
 
-@app.get("/home")
-def home_page():
-    return {'home page': 'some page in the future'}
+@app.get("/myposts")
+def myposts():
+    return {'posts': my_posts }
 
-@app.post("/createposts")
+@app.post("/posts")
 def create_posts(x_var_name: Post ):
-    print(x_var_name)
-    print(x_var_name.published)
-    return {"title": "body response"}
+    x_var_name = dict(x_var_name)
+    x_var_name['id'] = 76152
+    my_posts.append(x_var_name)
+    return {"title": my_posts}
