@@ -58,12 +58,14 @@ def read_root():
 
 @app.get("/sqlalchemy")
 def test_posts(db: Session = Depends(get_db)):
-    return {'status':'success'}
+    posts = db.query(models.Post).all()
+    return {'data':posts}
 
 @app.get("/myposts")
-def myposts():
-    cursor.execute('''SELECT * FROM posts''')
-    posts = cursor.fetchall()
+def myposts(db: Session = Depends(get_db)):
+    """ cursor.execute('''SELECT * FROM posts''')
+    posts = cursor.fetchall() """
+    posts = db.query(models.Post).all()
     return {'data': posts }
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
