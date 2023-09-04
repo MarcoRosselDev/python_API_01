@@ -38,11 +38,6 @@ while True:
         time.sleep(3)
 
 my_posts = [{'title':'my first post', 'content': 'content of my first post', 'id': 1}, {'title':'my second post', 'content': 'content of my second post', 'id': 2}]
-
-def get_post(id):
-    for i in my_posts:
-        if i['id'] == id:
-            return i
         
 def found_id(id): 
     for i, p in enumerate(my_posts):
@@ -68,7 +63,8 @@ def create_posts(x_var_name: Post ):
 
 @app.get("/posts/{id}")
 def get_one_post(id:int):
-    post =  get_post(id)
+    cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
+    post = cursor.fetchone()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'post with id: {id} was not found')
     return {'post_detail': post}
