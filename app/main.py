@@ -23,8 +23,7 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-"""     id: int
-    content_at: str """
+
     
 while True:
     try:
@@ -36,13 +35,6 @@ while True:
         print('Connecting to database failed')
         print('Error: ', error)
         time.sleep(3)
-
-my_posts = [{'title':'my first post', 'content': 'content of my first post', 'id': 1}, {'title':'my second post', 'content': 'content of my second post', 'id': 2}]
-        
-def found_id(id): 
-    for i, p in enumerate(my_posts):
-        if p['id'] == id:
-            return i
 
 @app.get("/")
 def read_root():
@@ -80,13 +72,11 @@ def delete_posts(id:int):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put("/posts/{id}")
-def update_post(id:int, x_post:Post):
-    index = found_id(id)
-
-    if index == None:
+def update_post(id:int, x_post: Post):
+    cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (x_post.title, x_post.content, x_post.published, str(id)))
+    updated_post = cursor.fetchone()
+    conn.commit()
+    if updated_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id: {id} does not exist.")
-    post_dict = x_post.dict()
-    post_dict['id'] = id
-    my_posts[index] = post_dict
 
-    return {'data': post_dict}
+    return {'data': updated_post}
