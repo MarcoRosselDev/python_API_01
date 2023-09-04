@@ -2,6 +2,9 @@ from fastapi import FastAPI, Body, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 import random
+from decouple import config
+
+print(config('MY_PASS'))
 
 app = FastAPI()
 
