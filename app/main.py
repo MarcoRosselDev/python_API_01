@@ -1,17 +1,33 @@
-from fastapi import FastAPI, Body, Response, status, HTTPException
+from fastapi import FastAPI, Body, Response, status, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from sqlalchemy.orm import Session
 
 from decouple import config # .env config
+pass_sql = config('MY_PSQL_PASS') # sintaxis para guardar los pass seguros
 import time # to sleep 2 second to retry connect with database
 
-pass_sql = config('MY_PSQL_PASS') # sintaxis para guardar los pass seguros
+from . import models
+from .database import SessionLocal, engine
+
+
+models.Base.metadata.create_all(bind=engine)
+
 #conn = psycopg2.connect("dbname=Local server user=postgres")
 
 app = FastAPI()
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 """ class Post(BaseModel):  #---> Modelo imortado de pydantic que valida el formato resivido segun un modelo
     title: str      #----> Valor requerido
@@ -39,6 +55,10 @@ while True:
 @app.get("/")
 def read_root():
     return {"Hello": "Worlddddd"}
+
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    return {'status':'success'}
 
 @app.get("/myposts")
 def myposts():

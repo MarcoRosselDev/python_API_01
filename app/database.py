@@ -6,7 +6,7 @@ from decouple import config
 pass_sql = config('MY_PSQL_PASS')
 
 #SQLALCHEMY_DATABASE_URL = "postgresql://<username>:<password>@<ip-address/hostname>/<database_name>"
-SQLALCHEMY_DATABASE_URL = "postgresql://posgres:%s@localhost/fast_api_01", (pass_sql)
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:%s@localhost/fast_api_01" %(pass_sql)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
