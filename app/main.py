@@ -7,6 +7,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 from decouple import config # .env config
+import time # to sleep 2 second to retry connect with database
 
 pass_sql = config('MY_PSQL_PASS') # sintaxis para guardar los pass seguros
 #conn = psycopg2.connect("dbname=Local server user=postgres")
@@ -25,14 +26,16 @@ class Post(BaseModel):
     published: bool
     id: int
     content_at: str
-
-try:
-    conn = psycopg2.connect(host='localhost', database='fast_api_01', user='postgres', password=pass_sql, cursor_factory=RealDictCursor)
-    cursor = conn.cursor()
-    print('Databese connection was successfull')
-except Exception as error:
-    print('Connecting to database failed')
-    print('Error: ', error)
+while True:
+    try:
+        conn = psycopg2.connect(host='localhost', database='fast_api_01', user='postgres', password=pass_sql, cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
+        print('Databese connection was successfull')
+        break
+    except Exception as error:
+        print('Connecting to database failed')
+        print('Error: ', error)
+        time.sleep(3)
 
 my_posts = [{'title':'my first post', 'content': 'content of my first post', 'id': 1}, {'title':'my second post', 'content': 'content of my second post', 'id': 2}]
 
@@ -52,7 +55,9 @@ def read_root():
 
 @app.get("/myposts")
 def myposts():
-    return {'data': my_posts }
+    cursor.execute('''SELECT * FROM posts''')
+    posts = cursor.fetchall()
+    return {'data': posts }
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_posts(x_var_name: Post ):
