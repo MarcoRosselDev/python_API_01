@@ -1,10 +1,15 @@
 from fastapi import FastAPI, Body, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import random
-from decouple import config
+import random # random to id for now
 
-print(config('MY_PASS')) # sintaxis para guardar los pass seguros
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+from decouple import config # .env config
+
+pass_sql = config('MY_PSQL_PASS') # sintaxis para guardar los pass seguros
+#conn = psycopg2.connect("dbname=Local server user=postgres")
 
 app = FastAPI()
 
@@ -20,6 +25,14 @@ class Post(BaseModel):
     published: bool
     id: int
     content_at: str
+
+try:
+    conn = psycopg2.connect(host='localhost', database='fast_api_01', user='postgres', password=pass_sql, cursor_factory=RealDictCursor)
+    cursor = conn.cursor()
+    print('Databese connection was successfull')
+except Exception as error:
+    print('Connecting to database failed')
+    print('Error: ', error)
 
 my_posts = [{'title':'my first post', 'content': 'content of my first post', 'id': 1}, {'title':'my second post', 'content': 'content of my second post', 'id': 2}]
 
