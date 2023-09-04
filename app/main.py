@@ -4,15 +4,22 @@ from typing import Optional
 import random
 from decouple import config
 
-print(config('MY_PASS'))
+print(config('MY_PASS')) # sintaxis para guardar los pass seguros
 
 app = FastAPI()
 
-class Post(BaseModel):  #---> Modelo imortado de pydantic que valida el formato resivido segun un modelo
+""" class Post(BaseModel):  #---> Modelo imortado de pydantic que valida el formato resivido segun un modelo
     title: str      #----> Valor requerido
     content: str    #----> Valor requerido. Si no esta, lanza error.
     published: bool = True  #----> Valor por defecto.
-    reting_optional: Optional[int] = None  #---> Valor opcional
+    reting_optional: Optional[int] = None  #---> Valor opcional """
+
+class Post(BaseModel):
+    title: str
+    content: str
+    published: bool
+    id: int
+    content_at: str
 
 my_posts = [{'title':'my first post', 'content': 'content of my first post', 'id': 1}, {'title':'my second post', 'content': 'content of my second post', 'id': 2}]
 
