@@ -63,16 +63,15 @@ def test_posts(db: Session = Depends(get_db)):
 
 @app.get("/myposts")
 def myposts(db: Session = Depends(get_db)):
-    """ cursor.execute('''SELECT * FROM posts''')
-    posts = cursor.fetchall() """
     posts = db.query(models.Post).all()
     return {'data': posts }
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(x_var_name: Post ):
-    cursor.execute(""" INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, (x_var_name.title, x_var_name.content, x_var_name.published))
-    new_post = cursor.fetchone()
-    conn.commit()
+def create_posts(x_var_name: Post, db: Session = Depends(get_db)):
+    new_post = models.Post(**x_var_name.dict())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
     return {"data": new_post}
 
 @app.get("/posts/{id}")
