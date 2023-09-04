@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Body, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-import random # random to id for now
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -23,9 +22,10 @@ app = FastAPI()
 class Post(BaseModel):
     title: str
     content: str
-    published: bool
-    id: int
-    content_at: str
+    published: bool = True
+"""     id: int
+    content_at: str """
+    
 while True:
     try:
         conn = psycopg2.connect(host='localhost', database='fast_api_01', user='postgres', password=pass_sql, cursor_factory=RealDictCursor)
@@ -61,11 +61,10 @@ def myposts():
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_posts(x_var_name: Post ):
-    #x_var_name = dict(x_var_name)
-    post_dict = dict(x_var_name)
-    post_dict['id'] = int(random.randint(0, 1000))
-    my_posts.append(post_dict)
-    return {"data": my_posts}
+    cursor.execute(""" INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """, (x_var_name.title, x_var_name.content, x_var_name.published))
+    new_post = cursor.fetchone()
+    conn.commit()
+    return {"data": new_post}
 
 @app.get("/posts/{id}")
 def get_one_post(id:int):
