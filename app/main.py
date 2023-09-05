@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Body, Response, status, HTTPException, Depends
-from pydantic import BaseModel
 from typing import Optional
 
 import psycopg2
@@ -12,7 +11,7 @@ import time # to sleep 2 second to retry connect with database
 
 from . import models
 from .database import SessionLocal, engine
-
+from .schemas import PostCreate
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -34,12 +33,6 @@ def get_db():
     content: str    #----> Valor requerido. Si no esta, lanza error.
     published: bool = True  #----> Valor por defecto.
     reting_optional: Optional[int] = None  #---> Valor opcional """
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-
     
 while True:
     try:
@@ -56,18 +49,13 @@ while True:
 def read_root():
     return {"Hello": "Worlddddd"}
 
-@app.get("/sqlalchemy")
-def test_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return {'data':posts}
-
 @app.get("/myposts")
 def myposts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return {'data': posts }
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(x_var_name: Post, db: Session = Depends(get_db)):
+def create_posts(x_var_name: PostCreate, db: Session = Depends(get_db)):
     new_post = models.Post(**x_var_name.dict())
     db.add(new_post)
     db.commit()
@@ -99,7 +87,7 @@ def delete_posts(id:int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put("/posts/{id}")
-def update_post(id:int, x_post: Post, db: Session = Depends(get_db)):
+def update_post(id:int, x_post: PostCreate, db: Session = Depends(get_db)):
     #cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (x_post.title, x_post.content, x_post.published, str(id)))
     #updated_post = cursor.fetchone()
     #conn.commit()
