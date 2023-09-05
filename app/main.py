@@ -62,7 +62,7 @@ def create_posts(x_var_name: PostCreate, db: Session = Depends(get_db)):
     db.refresh(new_post)
     return new_post
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=Post)
 def get_one_post(id:int, db: Session = Depends(get_db)):
     #cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
     #post = cursor.fetchone()
@@ -86,7 +86,7 @@ def delete_posts(id:int, db: Session = Depends(get_db)):
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.put("/posts/{id}")
+@app.put("/posts/{id}", response_model=Post)
 def update_post(id:int, x_post: PostCreate, db: Session = Depends(get_db)):
     #cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (x_post.title, x_post.content, x_post.published, str(id)))
     #updated_post = cursor.fetchone()
