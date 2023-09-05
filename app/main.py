@@ -11,7 +11,7 @@ import time # to sleep 2 second to retry connect with database
 
 from . import models
 from .database import SessionLocal, engine
-from .schemas import PostCreate
+from .schemas import PostCreate, Post
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -52,15 +52,15 @@ def read_root():
 @app.get("/myposts")
 def myposts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
-    return {'data': posts }
+    return posts 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=Post)
 def create_posts(x_var_name: PostCreate, db: Session = Depends(get_db)):
     new_post = models.Post(**x_var_name.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
-    return {"data": new_post}
+    return new_post
 
 @app.get("/posts/{id}")
 def get_one_post(id:int, db: Session = Depends(get_db)):
@@ -70,7 +70,7 @@ def get_one_post(id:int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'post with id: {id} was not found')
-    return {'post_detail': post}
+    return post
 
 @app.delete('/posts/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_posts(id:int, db: Session = Depends(get_db)):
@@ -98,4 +98,4 @@ def update_post(id:int, x_post: PostCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id: {id} does not exist.")
     updated_post.update(x_post.dict(), synchronize_session=False)
     db.commit()
-    return {'data': updated_post.first()}
+    return updated_post.first()
