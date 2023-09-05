@@ -75,9 +75,11 @@ def create_posts(x_var_name: Post, db: Session = Depends(get_db)):
     return {"data": new_post}
 
 @app.get("/posts/{id}")
-def get_one_post(id:int):
-    cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
-    post = cursor.fetchone()
+def get_one_post(id:int, db: Session = Depends(get_db)):
+    #cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
+    #post = cursor.fetchone()
+    
+    post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'post with id: {id} was not found')
     return {'post_detail': post}
