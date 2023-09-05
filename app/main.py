@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Body, Response, status, HTTPException, Depends
-from typing import Optional
+from typing import Optional, List
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -9,9 +9,9 @@ from decouple import config # .env config
 pass_sql = config('MY_PSQL_PASS') # sintaxis para guardar los pass seguros
 import time # to sleep 2 second to retry connect with database
 
-from . import models
+from . import models # Post, Users, format model of information pased
 from .database import SessionLocal, engine
-from .schemas import PostCreate, Post
+from .schemas import PostCreate, Post, UserCreate
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -49,7 +49,7 @@ while True:
 def read_root():
     return {"Hello": "Worlddddd"}
 
-@app.get("/myposts")
+@app.get("/myposts", response_model=List[Post])
 def myposts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts 
@@ -99,3 +99,11 @@ def update_post(id:int, x_post: PostCreate, db: Session = Depends(get_db)):
     updated_post.update(x_post.dict(), synchronize_session=False)
     db.commit()
     return updated_post.first()
+
+@app.post("/users", status_code=status.HTTP_201_CREATED)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 """ class Post(BaseModel):
@@ -21,3 +21,9 @@ class Post(PostBase):
 
     class Config:
         orm_mode = True
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    # pip freeze ----> email-validator==2.0.0.post2 <---- check if this is installed
+    # pip install email-validator -----> to install that library
