@@ -12,6 +12,8 @@ import time # to sleep 2 second to retry connect with database
 from . import models # Post, Users, format model of information pased
 from .database import SessionLocal, engine
 from . import schemas #import * #PostCreate, Post, UserCreate
+from passlib.context import CryptContext # algorithm to encript our user passwords
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
@@ -98,6 +100,10 @@ def update_post(id:int, x_post: schemas.PostCreate, db: Session = Depends(get_db
 
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # hash the password = user.password
+    hashed_password = pwd_context.hash(user.password)
+    user.password = hashed_password
+
     new_user = models.User(**user.dict())
     db.add(new_user)
     db.commit()
