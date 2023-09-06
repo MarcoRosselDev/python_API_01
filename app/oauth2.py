@@ -1,5 +1,6 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+from . import schemas
 from decouple import config # .env config
 secret_key_env = config('SECRET_KEY')
 algorithm_env = config('ALGORITHM')
@@ -20,4 +21,11 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 def verify_access_token(token:str, credentials_exeption):
-    payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        id_user:str = payload.get("user_id")
+        if id_user is None:
+            raise credentials_exeption
+        token_data = schemas.TokenData(id_user=id)
+    except JWTError:
+        raise credentials_exeption
