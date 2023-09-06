@@ -27,3 +27,11 @@ class UserCreate(BaseModel):
     password: str
     # pip freeze ----> email-validator==2.0.0.post2 <---- check if this is installed
     # pip install email-validator -----> to install that library
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

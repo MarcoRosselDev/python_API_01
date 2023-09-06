@@ -11,12 +11,8 @@ import time # to sleep 2 second to retry connect with database
 
 from . import models # Post, Users, format model of information pased
 from .database import SessionLocal, engine
-from .schemas import PostCreate, Post, UserCreate
-
+from . import schemas #import * #PostCreate, Post, UserCreate
 models.Base.metadata.create_all(bind=engine)
-
-#conn = psycopg2.connect("dbname=Local server user=postgres")
-
 app = FastAPI()
 
 # Dependency
@@ -49,20 +45,20 @@ while True:
 def read_root():
     return {"Hello": "Worlddddd"}
 
-@app.get("/myposts", response_model=List[Post])
+@app.get("/myposts", response_model=List[schemas.Post])
 def myposts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=Post)
-def create_posts(x_var_name: PostCreate, db: Session = Depends(get_db)):
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+def create_posts(x_var_name: schemas.PostCreate, db: Session = Depends(get_db)):
     new_post = models.Post(**x_var_name.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
     return new_post
 
-@app.get("/posts/{id}", response_model=Post)
+@app.get("/posts/{id}", response_model=schemas.Post)
 def get_one_post(id:int, db: Session = Depends(get_db)):
     #cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
     #post = cursor.fetchone()
@@ -86,8 +82,8 @@ def delete_posts(id:int, db: Session = Depends(get_db)):
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.put("/posts/{id}", response_model=Post)
-def update_post(id:int, x_post: PostCreate, db: Session = Depends(get_db)):
+@app.put("/posts/{id}", response_model=schemas.Post)
+def update_post(id:int, x_post: schemas.PostCreate, db: Session = Depends(get_db)):
     #cursor.execute(""" UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (x_post.title, x_post.content, x_post.published, str(id)))
     #updated_post = cursor.fetchone()
     #conn.commit()
@@ -100,8 +96,8 @@ def update_post(id:int, x_post: PostCreate, db: Session = Depends(get_db)):
     db.commit()
     return updated_post.first()
 
-@app.post("/users", status_code=status.HTTP_201_CREATED)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     new_user = models.User(**user.dict())
     db.add(new_user)
     db.commit()
