@@ -12,9 +12,9 @@ def myposts(db: Session = Depends(get_db), user_id:int=Depends(oauth2.get_curren
     return posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
-def create_posts(x_var_name: schemas.PostCreate, db: Session = Depends(get_db), current_user:int=Depends(oauth2.get_current_user)):
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), current_user:int=Depends(oauth2.get_current_user)):
     print(current_user)
-    new_post = models.Post(**x_var_name.dict())
+    new_post = models.Post(**post.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
