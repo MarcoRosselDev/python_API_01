@@ -5,6 +5,9 @@ from sqlalchemy.orm import sessionmaker
 from decouple import config
 pass_sql = config('MY_PSQL_PASS')
 
+from . import models
+
+# Dependency
 #SQLALCHEMY_DATABASE_URL = "postgresql://<username>:<password>@<ip-address/hostname>/<database_name>"
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:%s@localhost/fast_api_01" %(pass_sql)
 
@@ -13,3 +16,11 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+#models.Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

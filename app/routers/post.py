@@ -7,7 +7,7 @@ from .get_db_fun import get_db
 router = APIRouter(prefix="/posts", tags=["Post"])
 
 @router.get("/", response_model=List[schemas.Post])
-def myposts(db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def myposts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post).all()
     return posts
 
@@ -22,6 +22,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), curren
 
 @router.get("/{id}", response_model=schemas.Post)
 def get_one_post(id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    print(current_user)
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'post with id: {id} was not found')
