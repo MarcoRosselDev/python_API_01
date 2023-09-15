@@ -8,6 +8,7 @@ router = APIRouter(prefix="/posts", tags=["Post"])
 
 @router.get("/", response_model=List[schemas.Post])
 def myposts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+    print(current_user)
     posts = db.query(models.Post).all()
     return posts
 
